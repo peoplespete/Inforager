@@ -24,14 +24,15 @@
 
 
           $("#submit").prop("disabled", true);
-          $('html,body').animate({scrollTop: 300}, 200);
+          $('html,body').animate({scrollTop: 500}, 200);
 
 
           name = $("#name").val();
-          mode = $(".mode:checked").val();
+          distance = $(".distance:checked").val();
+          density = $(".density:checked").val();
           _.remove(names, function(n){ return n == name});
 
-          density = (mode == 'mono' ? 10 : 1);
+          density = (density == 'packed' ? 10 : 1);
           for (var i = 0; i < density; i++){
             names.push(name)
           }
@@ -47,12 +48,12 @@
             }
           });
 
-          distance = (mode == 'mono' ? 500 : 50);
+          distance = (distance == 'far' ? 500 : 50);
           $('.letter-section').css('margin-bottom', `${distance}px`)
 
           addListeners()
           // window.setTimeout(timeUp, 6 * 1000);
-          window.setTimeout(timeUp, 60 * 1000);
+          window.setTimeout(timeUp, 30 * 1000);
         });
       });
 
@@ -78,10 +79,10 @@
         visited = _.filter(counts, function(value, key) {
           return value.count > 0
         })
-        visitsMessage = `You visited ${visited.length} paragraphs.\n`
+        // visitsMessage = `You visited ${visited.length} paragraphs.\n`
         averageTime = _.meanBy(visited, function(value, key) { return (value.last - value.first); });
-        averageMessage = `\nYou stayed at each paragraph for an average of ${Math.round(averageTime / 1000)} seconds.\n`
-        $('.results-body').append("<div class='results-message'>" + visitsMessage + "</div>");
+        averageMessage = `\nYou stayed at each paragraph for an average of ${(averageTime / 1000).toFixed(2)} seconds.\n`
+        // $('.results-body').append("<div class='results-message'>" + visitsMessage + "</div>");
         $('.results-body').append("<div class='results-message'>" + averageMessage + "</div>");
         $('.results').show();
         $('html,body').animate({scrollTop:0}, 200);
@@ -141,15 +142,23 @@
           <div class="panel panel-default">
             <div class="panel-heading"><h1>Welcome to Inforager</h1></div>
             <div class="panel-body">
-              <p>The way to play is to enter your name and chose whether you want to monotask (low switching mode) or multitask (high switching mode).  Then click any sentences with your name.  The more the better.  You may have to scroll to get to more of them.  Try and figure out the two factors influencing how long you stay in a patch of sentences.</p>
+              <p>The goal of this game is to figure out what combination of distance and density create an environment with the longest time per sentence group.  Try out many different combinations of distance and density until you find the answer.</p>
+              <div>How to play:</div>
+              <p>Click any sentences with your name.  The more the better.  You may have to scroll to get to more of them.</p>
               <form id="form">
                 <div class="form-group">
                   <label>Name: </label>
                   <input type="text" id="name" placeholder="Name"/>
                 </div>
+                <label>Distance:</label>
                 <div class="radio">
-                  <input type="radio" class="mode" name="mode" value="mono" checked="checked">Low Switching Mode<br/>
-                  <input type="radio" class="mode" name="mode" value="multi">High Switching Mode<br/>
+                  <input type="radio" class="distance" name="distance" value="near" checked="checked">Near<br/>
+                  <input type="radio" class="distance" name="distance" value="far">Far<br/>
+                </div>
+                <label>Density:</label>
+                <div class="radio">
+                  <input type="radio" class="density" name="density" value="sparse" checked="checked">Sparse<br/>
+                  <input type="radio" class="density" name="density" value="packed">Packed<br/>
                 </div>
                 <input type="button" id="submit" class="btn btn-primary" value="Start"/>
               </form>
