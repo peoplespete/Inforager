@@ -1,0 +1,165 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.4/lodash.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+    <script>
+
+      $(document).ready(function(){
+        $('.results').hide();
+
+        $("#submit").click(function() {
+          counts = {}
+          for (value of 'abcdefghijklmnopqrstuvwxyz'.split('')) {
+            counts[value] = {
+              count: 0,
+              first: null,
+              last: null
+            }
+          }
+
+          names = ['Jackqueline', 'Ericka', 'Josephine', 'Daniel', 'Randy'];
+          adjectives = ['functional', 'cloudy', 'pumped', 'rural', 'best', 'flowery', 'festive', 'guiltless'];
+
+
+          $("#submit").prop("disabled", true);
+          $('html,body').animate({scrollTop: 300}, 200);
+
+
+          name = $("#name").val();
+          mode = $(".mode:checked").val();
+          _.remove(names, function(n){ return n == name});
+
+          density = (mode == 'mono' ? 10 : 1);
+          for (var i = 0; i < density; i++){
+            names.push(name)
+          }
+
+          _.forEach(counts, function(value, key) {
+            $('#field').append("<div class='letter-section'><div id='" + key + "'></div></div>");
+            for (var i = 0; i < 15; i++){
+              person = _.sample(names)
+              adjective = _.sample(adjectives)
+              klass = `${key} sentence btn`
+              if(person == name) { klass += ' correct' }
+              $(`#${key}`).prepend("<span class='" + klass + "'>" + person + " is " + adjective + ". </span>");
+            }
+          });
+
+          distance = (mode == 'mono' ? 500 : 50);
+          $('.letter-section').css('margin-bottom', `${distance}px`)
+
+          addListeners()
+          // window.setTimeout(timeUp, 6 * 1000);
+          window.setTimeout(timeUp, 60 * 1000);
+        });
+      });
+
+
+      function addListeners() {
+        _.forEach(counts, function(value, key) {
+          $('.' + key + '.correct').click(function(){
+            $(this).css('visibility', 'hidden');
+            if(counts[key]['count'] == 0) {
+              counts[key]['first'] = moment();
+            }
+            counts[key]['last'] = moment();
+            counts[key]['count']++;
+          });
+        })
+      }
+
+      function timeUp() {
+        $('.letter-section').remove();
+        $('.results-message').remove();
+        $("#submit").prop("disabled", false);
+
+        visited = _.filter(counts, function(value, key) {
+          return value.count > 0
+        })
+        visitsMessage = `You visited ${visited.length} paragraphs.\n`
+        averageTime = _.meanBy(visited, function(value, key) { return (value.last - value.first); });
+        averageMessage = `\nYou stayed at each paragraph for an average of ${Math.round(averageTime / 1000)} seconds.\n`
+        $('.results-body').append("<div class='results-message'>" + visitsMessage + "</div>");
+        $('.results-body').append("<div class='results-message'>" + averageMessage + "</div>");
+        $('.results').show();
+        $('html,body').animate({scrollTop:0}, 200);
+      }
+    </script>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet">
+    <style media="screen" type="text/css">
+      body {
+        background-color: #333333;
+
+      }
+      .results {
+        background-color: #3eccb5;
+        color: white;
+      }
+
+      .panel-default > .panel-heading {
+        background-color: #3eccb5;
+      }
+
+      h1 {
+        font-family: 'Playfair Display', serif;
+        color: white;
+      }
+
+      .container {
+        margin-top: 20px;
+      }
+      .panel {
+        width: 70%;
+        margin: auto;
+        margin-bottom: 20px;
+      }
+      .radio {
+        margin-left: 20px;
+      }
+
+      .sentence, .sentence:hover {
+        background-color: white;
+        color: #333333;
+        font-size: 0.6em;
+        font-style: bold;
+        margin: 4px;
+        padding: 4px;
+      }
+    </style>
+    <title>Information Forager</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="panel panel-default results">
+            <div class="panel-body results-body"></div>
+        </div>
+          <div class="panel panel-default">
+            <div class="panel-heading"><h1>Welcome to Inforager</h1></div>
+            <div class="panel-body">
+              <p>The way to play is to enter your name and chose whether you want to monotask (low switching mode) or multitask (high switching mode).  Then click any sentences with your name.  The more the better.  You may have to scroll to get to more of them.  Try and figure out the two factors influencing how long you stay in a patch of sentences.</p>
+              <form id="form">
+                <div class="form-group">
+                  <label>Name: </label>
+                  <input type="text" id="name" placeholder="Name"/>
+                </div>
+                <div class="radio">
+                  <input type="radio" class="mode" name="mode" value="mono" checked="checked">Low Switching Mode<br/>
+                  <input type="radio" class="mode" name="mode" value="multi">High Switching Mode<br/>
+                </div>
+                <input type="button" id="submit" class="btn btn-primary" value="Start"/>
+              </form>
+            </div>
+          </div>
+
+          <div id='field'>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
